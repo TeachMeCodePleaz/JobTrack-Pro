@@ -7,18 +7,18 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
+/**
+ * Data Access Object for job application records.
+ */
 public class ApplicationDao {
 
     /**
-     * 异步添加一条新的求职申请记录。
-     * 结合了 JDBC 和单线程并发调度器。
+     * Asynchronously adds a new job application to the database.
      */
     public static void addApplicationAsync(int userId, String companyName, String position, String status, String notes) {
-        // 将包含 SQL 逻辑的任务打包成一个 Runnable，扔给单线程池排队执行
         DatabaseExecutor.executeWrite(() -> {
             String sql = "INSERT INTO applications(user_id, company_name, position, status, notes) VALUES(?, ?, ?, ?, ?)";
             
-            // 使用 try-with-resources 自动管理数据库连接关闭
             try (Connection conn = DatabaseManager.getConnection();
                  PreparedStatement pstmt = conn.prepareStatement(sql)) {
                  
@@ -29,10 +29,10 @@ public class ApplicationDao {
                 pstmt.setString(5, notes);
                 
                 pstmt.executeUpdate();
-                System.out.println("[DB] 成功异步写入一条申请记录: " + companyName + " - " + position);
+                System.out.println("[DB] Async write success: " + companyName + " (" + position + ")");
                 
             } catch (SQLException e) {
-                System.err.println("[DB Error] 写入记录失败: " + e.getMessage());
+                System.err.println("[DB Error] Failed to write record: " + e.getMessage());
             }
         });
     }

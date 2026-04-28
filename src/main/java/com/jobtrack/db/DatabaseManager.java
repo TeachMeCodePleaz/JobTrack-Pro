@@ -5,27 +5,32 @@ import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * DatabaseManager handles the lifecycle of the SQLite database.
+ * It ensures tables are created upon the first launch.
+ */
 public class DatabaseManager {
 
-    // 数据库文件将存放在项目根目录
     private static final String DB_URL = "jdbc:sqlite:jobtrack_pro.db";
 
     /**
-     * 获取数据库连接。每次需要查询时调用此方法。
+     * Establishes a connection to the SQLite database.
+     * @return Connection object
+     * @throws SQLException if connection fails
      */
     public static Connection getConnection() throws SQLException {
         return DriverManager.getConnection(DB_URL);
     }
 
     /**
-     * 初始化数据库架构。应该在程序入口 (main 方法) 处最先调用。
+     * Initializes the database schema.
+     * This method should be called at the start of the application.
      */
     public static void initializeDatabase() {
-        // 使用 try-with-resources 确保资源自动释放
         try (Connection conn = getConnection();
              Statement stmt = conn.createStatement()) {
 
-            // 1. 创建用户表
+            // Create Users table for authentication
             String createUsersTable = """
                 CREATE TABLE IF NOT EXISTS users (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -36,8 +41,7 @@ public class DatabaseManager {
                 """;
             stmt.execute(createUsersTable);
 
-            // 2. 创建求职申请表
-            // 根据 Proposal 包含: company name, position, status, notes
+            // Create Applications table for job tracking
             String createApplicationsTable = """
                 CREATE TABLE IF NOT EXISTS applications (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -52,12 +56,11 @@ public class DatabaseManager {
                 """;
             stmt.execute(createApplicationsTable);
 
-            System.out.println("数据库初始化成功，表结构已就绪。");
+            System.out.println("[DB] Database initialized successfully. Tables are ready.");
 
         } catch (SQLException e) {
-            System.err.println("数据库初始化失败: " + e.getMessage());
-            // 数据库初始化失败属于致命错误，直接抛出运行时异常
-            throw new RuntimeException("Database initialization failed", e);
+            System.err.println("[DB Error] Initialization failed: " + e.getMessage());
+            throw new RuntimeException("Critical database error", e);
         }
     }
 }

@@ -7,22 +7,19 @@ import com.jobtrack.dao.ApplicationDao;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Starting JobTrack Pro...");
-        
-        // 第一步：初始化数据库
+
         DatabaseManager.initializeDatabase();
         System.out.println("System ready.");
 
-        // 第二步：测试单线程并发写入 
-        System.out.println("正在向后台线程池提交写任务...");
+        System.out.println("Submitting write tasks to the background pool...");
         
-        // 模拟用户在 GUI 上疯狂点击或者后台爬虫同时抓取到数据
-        ApplicationDao.addApplicationAsync(1, "Amazon", "SDE Intern", "Applied", "找学长内推的");
-        ApplicationDao.addApplicationAsync(1, "TikTok", "Backend Intern", "OA Pending", "需要复习 Java 多线程");
+        // Simulate concurrent user/background updates
+        ApplicationDao.addApplicationAsync(1, "Amazon", "SDE Intern", "Applied", "Referral from alumni");
+        ApplicationDao.addApplicationAsync(1, "TikTok", "Backend Intern", "OA Pending", "Need to review multithreading");
 
-        // 第三步：优雅关闭线程池
-        // 告诉线程池：“不接新任务了，把队列里排队的这俩任务干完就下班。”
+        // Ensures the background thread completes existing tasks before exiting
         DatabaseExecutor.shutdown();
         
-        System.out.println("主线程执行完毕，等待后台数据库操作...");
+        System.out.println("Main thread execution finished. Waiting for background DB operations...");
     }
 }
