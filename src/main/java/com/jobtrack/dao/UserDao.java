@@ -38,38 +38,41 @@ public class UserDao {
         });
     }
 
-    /**
-     * Authenticates a user by checking the database and verifying the BCrypt hash.
-     * Note: This uses CompletableFuture to return results from the async DB operation.
-     */
-    public static CompletableFuture<User> authenticate(String username, String plainPassword) {
-        CompletableFuture<User> future = new CompletableFuture<>();
-        
-        // We use the executor to keep DB access off the main thread
-        DatabaseExecutor.executeWrite(() -> {
-            String sql = "SELECT id, username, password_hash FROM users WHERE username = ?";
-            try (Connection conn = DatabaseManager.getConnection();
-                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+   public static CompletableFuture<User> authenticate(String username, String plainPassword) {
+    CompletableFuture<User> future = new CompletableFuture<>();
+    
+    DatabaseExecutor.executeWrite(() -> {
+        String sql = "SELECT id, username, password_hash FROM users WHERE username = ?";
+        try (Connection conn = DatabaseManager.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, username);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                String storedHash = rs.getString("password_hash");
+                // 增加调试输出
+                System.out.println("[Debug] User found in DB. Verifying password...");
                 
-                pstmt.setString(1, username);
-                ResultSet rs = pstmt.executeQuery();
-                
-                if (rs.next()) {
-                    String storedHash = rs.getString("password_hash");
-                    if (SecurityUtils.verifyPassword(plainPassword, storedHash)) {
-                        future.complete(new User(rs.getInt("id"), rs.getString("username"), storedHash));
-                    } else {
-                        future.complete(null); // Wrong password
-                    }
+                if (SecurityUtils.verifyPassword(plainPassword, storedHash)) {
+                    System.out.println("[Debug] Password verified!");
+                    future.complete(new User(rs.getInt("id"), rs.getString("username"), storedHash));
                 } else {
-                    future.complete(null); // User not found
+                    System.out.println("[Debug] Password verification failed.");
+                    future.complete(null);
                 }
-                
-            } catch (SQLException e) {
-                future.completeExceptionally(e);
+            } else {
+                System.out.println("[Debug] Username not found in database: " + username);
+                future.complete(null);
             }
-        });
-        
-        return future;
+            
+        } catch (SQLException e) {
+            System.err.println("[Debug Error] DB Query error: " + e.getMessage());
+            future.completeExceptionally(e);
+        }
+    });
+    
+    return future;
+    
     }
 }
