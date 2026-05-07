@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack Pro - Login</title>
+    <style>
+        /* 引入更现代的系统字体和全局样式 */
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+            /* 优雅的微渐变背景 */
+            background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        
+        /* 优化比例和阴影的居中卡片 */
+        .login-box { 
+            background: white; 
+            padding: 50px 40px; 
+            border-radius: 16px; /* 更圆润的边角 */
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1); /* 更深的悬浮阴影 */
+            text-align: center; 
+            width: 360px; /* 适当加宽卡片 */
+        }
+
+        .login-box h2 {
+            margin-top: 0;
+            color: #2c3e50;
+            font-size: 32px;
+            margin-bottom: 30px;
+            letter-spacing: -0.5px;
+        }
+
+        /* 放大输入框和文字，增加舒适度 */
+        input { 
+            width: 100%; 
+            box-sizing: border-box; /* 确保 padding 不会撑破容器 */
+            padding: 16px; 
+            margin-bottom: 20px; 
+            border: 2px solid #e1e8ed; 
+            border-radius: 8px; 
+            font-size: 16px; /* 更易读的字体大小 */
+            transition: border-color 0.3s ease;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #007bff; /* 聚焦时高亮边框 */
+        }
+
+        /* 现代化按钮设计 */
+        button { 
+            width: 100%; 
+            padding: 16px; 
+            background-color: #28a745; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 18px; /* 按钮文字放大并加粗 */
+            font-weight: 600;
+            margin-top: 10px; 
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+        
+        button:hover { background-color: #218838; }
+        button:active { transform: scale(0.98); } /* 点击时的微缩放反馈 */
+        
+        .switch-btn { 
+            background-color: transparent; 
+            color: #007bff; 
+            border: 2px solid #007bff;
+            margin-top: 15px;
+        }
+        .switch-btn:hover { 
+            background-color: #007bff; 
+            color: white;
+        }
+
+        /* 提示信息样式 */
+        #message { 
+            margin-top: 20px; 
+            font-weight: 500; 
+            font-size: 15px;
+            min-height: 20px; /* 预留空间防止文字出现时页面抖动 */
+        }
+    </style>
+</head>
+<body>
+
+<div class="login-box">
+    <h2>JobTrack Pro</h2>
+    <input type="text" id="username" placeholder="Enter your username">
+    <input type="password" id="password" placeholder="Enter your password">
+    
+    <button onclick="handleAuth('/api/auth/login')">Sign In</button>
+    <button class="switch-btn" onclick="handleAuth('/api/auth/register')">Create Account</button>
+    
+    <div id="message"></div>
+</div>
+
+<script>
+    async function handleAuth(url) {
+        const username = document.getElementById('username').value.trim();
+        const password = document.getElementById('password').value.trim();
+        const messageBox = document.getElementById('message');
+
+        if(!username || !password) {
+            messageBox.style.color = "#dc3545";
+            messageBox.innerText = "Username and password cannot be empty.";
+            return;
+        }
+
+        messageBox.style.color = "#6c757d";
+        messageBox.innerText = "Processing...";
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username: username, password: password })
+            });
+
+            const data = await response.json();
+
+            if (response.ok) {
+                messageBox.style.color = "#28a745";
+                messageBox.innerText = data.message;
+                
+                if(url.includes('login')) {
+                    // 保存身份信息
+                    localStorage.setItem('userId', data.userId);
+                    localStorage.setItem('username', data.username);
+                    
+                    // 登录成功后，延迟 1.5 秒自动跳转到看板页面！
+                    messageBox.innerText = "Login successful! Redirecting...";
+                    setTimeout(() => {
+                        window.location.href = '/dashboard.html';
+                    }, 1500);
+                }
+            } else {
+                messageBox.style.color = "#dc3545";
+                messageBox.innerText = data.error || "Operation failed.";
+            }
+        } catch (error) {
+            messageBox.style.color = "#dc3545";
+            messageBox.innerText = "Network error: Server is unresponsive.";
+        }
+    }
+</script>
+
+</body>
+</html>

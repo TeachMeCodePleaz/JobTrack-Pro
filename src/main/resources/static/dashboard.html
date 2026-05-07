@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JobTrack Pro - Dashboard</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
+        
+        .navbar { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
+        .navbar h2 { margin: 0; }
+        
+        .welcome-text {
+            margin-right: 40px; 
+            font-weight: bold;
+            font-size: 18px; 
+        }
+        
+        .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
+        .logout-btn:hover { background-color: #c82333; }
+
+        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
+        
+        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; font-size: 22px; }
+
+        input, select { 
+            width: 100%; 
+            padding: 12px;
+            margin-bottom: 15px; 
+            border: 1px solid #ced4da; 
+            border-radius: 6px; 
+            box-sizing: border-box; 
+            font-size: 16px; 
+        }
+        
+        .submit-btn { width: 100%; background-color: #007bff; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        .submit-btn:hover { background-color: #0056b3; }
+
+  
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { text-align: left; padding: 14px 12px; border-bottom: 1px solid #e9ecef; font-size: 15px; }
+        th { background-color: #f8f9fa; color: #495057; font-weight: 600; font-size: 16px; }
+        
+
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
+        .status-Applied { background-color: #e2e3e5; color: #383d41; }
+        .status-OA { background-color: #cce5ff; color: #004085; }
+        .status-Interview { background-color: #fff3cd; color: #856404; }
+        .status-Offer { background-color: #d4edda; color: #155724; }
+        .status-Rejected { background-color: #f8d7da; color: #721c24; }
+    </style>
+</head>
+<body>
+
+    <div class="navbar">
+        <h2>JobTrack Pro Workspace</h2>
+        <div style="display: flex; align-items: center;">
+            <span id="welcomeText" class="welcome-text"></span>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="card">
+            <h3>Add New Application</h3>
+            <input type="text" id="company" placeholder="Company Name (e.g., Amazon)" required>
+            <input type="text" id="position" placeholder="Position (e.g., SDE Intern)" required>
+            
+            <select id="status">
+                <option value="Applied">Applied</option>
+                <option value="OA Pending">OA Pending</option>
+                <option value="Interview">Interview</option>
+                <option value="Offer">Offer</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            
+            <input type="text" id="notes" placeholder="Notes (e.g., Referral)">
+            <button class="submit-btn" onclick="addApplication()">Save Application</button>
+        </div>
+
+        <div class="card">
+            <h3>My Applications</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Company</th>
+                        <th>Position</th>
+                        <th>Status</th>
+                        <th>Notes</th>
+                    </tr>
+                </thead>
+                <tbody id="appTableBody">
+                    </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // 1. 页面加载时检查登录状态
+        const userId = localStorage.getItem('userId');
+        const username = localStorage.getItem('username');
+
+        if (!userId) {
+            alert('Please login first!');
+            window.location.href = '/'; 
+        } else {
+            document.getElementById('welcomeText').innerText = `Hello, ${username}`;
+            loadApplications(); 
+        }
+
+        function logout() {
+            localStorage.clear();
+            window.location.href = '/';
+        }
+
+        async function loadApplications() {
+            try {
+                const response = await fetch(`/api/applications?userId=${userId}`);
+                const data = await response.json();
+                
+                const tbody = document.getElementById('appTableBody');
+                tbody.innerHTML = ''; 
+                
+                data.forEach(app => {
+                    let statusClass = 'status-Applied';
+                    if (app.status.includes('OA')) statusClass = 'status-OA';
+                    if (app.status.includes('Interview')) statusClass = 'status-Interview';
+                    if (app.status.includes('Offer')) statusClass = 'status-Offer';
+                    if (app.status.includes('Rejected')) statusClass = 'status-Rejected';
+
+                    const row = `<tr>
+                        <td style="font-weight: bold; color: #2c3e50;">${app.companyName}</td>
+                        <td>${app.position}</td>
+                        <td><span class="status-badge ${statusClass}">${app.status}</span></td>
+                        <td style="color: #6c757d;">${app.notes || '-'}</td>
+                    </tr>`;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error("Failed to load data", error);
+            }
+        }
+
+
+        async function addApplication() {
+            const company = document.getElementById('company').value.trim();
+            const position = document.getElementById('position').value.trim();
+            const status = document.getElementById('status').value;
+            const notes = document.getElementById('notes').value.trim();
+
+            if(!company || !position) {
+                alert("Company and Position are required!");
+                return;
+            }
+
+            const payload = {
+                userId: parseInt(userId),
+                companyName: company,
+                position: position,
+                status: status,
+                notes: notes
+            };
+
+            try {
+                const response = await fetch('/api/applications', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                if(response.ok) {
+                    document.getElementById('company').value = '';
+                    document.getElementById('position').value = '';
+                    document.getElementById('notes').value = '';
+                    loadApplications();
+                } else {
+                    alert("Failed to save data.");
+                }
+            } catch (error) {
+                alert("Network error.");
+            }
+        }
+    </script>
+</body>
+</html>
