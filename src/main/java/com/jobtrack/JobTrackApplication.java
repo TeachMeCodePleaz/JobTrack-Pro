@@ -3,6 +3,8 @@ package com.jobtrack;
 import com.jobtrack.db.DatabaseManager;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 
 //import javax.annotation.PostConstruct; // Replaced with jakarta.annotation.PostConstruct for Spring Boot 3.x compatibility
 import jakarta.annotation.PostConstruct;
@@ -12,6 +14,8 @@ import jakarta.annotation.PostConstruct;
  * This class starts the embedded Tomcat server.
  */
 @SpringBootApplication
+@EnableScheduling // Enable scheduling for periodic tasks (like job status updates)
+@EnableAsync // Enable asynchronous processing for background tasks (like web scraping)
 public class JobTrackApplication {
 
     public static void main(String[] args) {

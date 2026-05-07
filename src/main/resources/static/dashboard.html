@@ -7,48 +7,74 @@
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
         
+        /* Navbar */
         .navbar { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
         .navbar h2 { margin: 0; }
-        
-        .welcome-text {
-            margin-right: 40px; 
-            font-weight: bold;
-            font-size: 18px; 
-        }
-        
+        .welcome-text { margin-right: 40px; font-weight: bold; font-size: 18px; }
         .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .logout-btn:hover { background-color: #c82333; }
 
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; display: grid; grid-template-columns: 1fr 2fr; gap: 20px; }
-        
-        .card { background: white; padding: 25px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 10px; font-size: 22px; }
+        /* Ticker */
+        #live-ticker { background-color: #e3f2fd; color: #0d47a1; padding: 10px 30px; font-weight: bold; font-size: 14px; text-align: center; border-bottom: 1px solid #bbdefb; }
 
+        /* Global Wrapper for responsive alignment */
+        .main-wrapper { max-width: 1400px; width: 95%; margin: 0 auto; padding-top: 30px; }
+
+        /* Top Container */
+        .container { display: grid; grid-template-columns: 350px 1fr; gap: 30px; margin-bottom: 30px; }
+        
+        /* Cards */
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 12px; font-size: 22px; margin-bottom: 25px; }
+
+        /* Form Inputs (Taller, more spacing) */
         input, select { 
             width: 100%; 
-            padding: 12px;
-            margin-bottom: 15px; 
+            height: 50px; 
+            padding: 12px 16px; 
+            margin-bottom: 25px; 
             border: 1px solid #ced4da; 
             border-radius: 6px; 
             box-sizing: border-box; 
             font-size: 16px; 
         }
         
-        .submit-btn { width: 100%; background-color: #007bff; color: white; border: none; padding: 14px; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 10px; }
+        .submit-btn { width: 100%; height: 50px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 5px; }
         .submit-btn:hover { background-color: #0056b3; }
 
-  
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { text-align: left; padding: 14px 12px; border-bottom: 1px solid #e9ecef; font-size: 15px; }
+        /* Tables */
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 16px 12px; border-bottom: 1px solid #e9ecef; font-size: 15px; }
         th { background-color: #f8f9fa; color: #495057; font-weight: 600; font-size: 16px; }
-        
 
-        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; }
-        .status-Applied { background-color: #e2e3e5; color: #383d41; }
+        /* Core Fix: Prevent Status column from being squeezed too much */
+        td:nth-child(3), th:nth-child(3) {
+            min-width: 130px; 
+        }
+        
+        /* Core Fix: Status Badges formatting */
+        .status-badge { 
+            padding: 6px 12px; 
+            border-radius: 20px; 
+            font-size: 13px; 
+            font-weight: bold; 
+            white-space: nowrap; /* Prevent text wrapping */
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center;
+            min-width: 90px; 
+        }
+        
+        .status-Applied { background-color: #ede7f6; color: #5e35b1; }
         .status-OA { background-color: #cce5ff; color: #004085; }
         .status-Interview { background-color: #fff3cd; color: #856404; }
         .status-Offer { background-color: #d4edda; color: #155724; }
         .status-Rejected { background-color: #f8d7da; color: #721c24; }
+
+        /* Market Card aligned with wrapper */
+        .market-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 50px; }
+        .link-btn { background-color: #17a2b8; color: white; text-decoration: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; }
+        .link-btn:hover { background-color: #138496; }
     </style>
 </head>
 <body>
@@ -61,43 +87,65 @@
         </div>
     </div>
 
-    <div class="container">
-        <div class="card">
-            <h3>Add New Application</h3>
-            <input type="text" id="company" placeholder="Company Name (e.g., Amazon)" required>
-            <input type="text" id="position" placeholder="Position (e.g., SDE Intern)" required>
-            
-            <select id="status">
-                <option value="Applied">Applied</option>
-                <option value="OA Pending">OA Pending</option>
-                <option value="Interview">Interview</option>
-                <option value="Offer">Offer</option>
-                <option value="Rejected">Rejected</option>
-            </select>
-            
-            <input type="text" id="notes" placeholder="Notes (e.g., Referral)">
-            <button class="submit-btn" onclick="addApplication()">Save Application</button>
+    <div id="live-ticker">
+        📡 Connecting to live job monitor...
+    </div>
+
+    <div class="main-wrapper">
+        <div class="container">
+            <div class="card">
+                <h3>Add New Application</h3>
+                <input type="text" id="company" placeholder="Company Name (e.g., Amazon)" required>
+                <input type="text" id="position" placeholder="Position (e.g., SDE Intern)" required>
+                
+                <select id="status">
+                    <option value="Applied">Applied</option>
+                    <option value="OA Pending">OA Pending</option>
+                    <option value="Interview">Interview</option>
+                    <option value="Offer">Offer</option>
+                    <option value="Rejected">Rejected</option>
+                </select>
+                
+                <input type="text" id="notes" placeholder="Notes (e.g., Referral)">
+                <button class="submit-btn" onclick="addApplication()">Save Application</button>
+            </div>
+
+            <div class="card">
+                <h3>My Applications</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Company</th>
+                            <th>Position</th>
+                            <th>Status</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appTableBody">
+                    </tbody>
+                </table>
+            </div>
         </div>
 
-        <div class="card">
-            <h3>My Applications</h3>
+        <div class="market-card">
+            <h3>🌍 Live Market: SDE 2026 Summer Intern </h3>
             <table>
                 <thead>
                     <tr>
                         <th>Company</th>
-                        <th>Position</th>
-                        <th>Status</th>
-                        <th>Notes</th>
+                        <th>Position Title</th>
+                        <th>Posted</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="appTableBody">
-                    </tbody>
+                <tbody id="marketTableBody">
+                    <tr><td colspan="4" style="text-align: center; color: #6c757d;">Scanning external market data (Waiting for first batch)...</td></tr>
+                </tbody>
             </table>
         </div>
     </div>
 
     <script>
-        // 1. 页面加载时检查登录状态
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
 
@@ -118,7 +166,6 @@
             try {
                 const response = await fetch(`/api/applications?userId=${userId}`);
                 const data = await response.json();
-                
                 const tbody = document.getElementById('appTableBody');
                 tbody.innerHTML = ''; 
                 
@@ -138,10 +185,9 @@
                     tbody.innerHTML += row;
                 });
             } catch (error) {
-                console.error("Failed to load data", error);
+                console.error("Failed to load personal application data", error);
             }
         }
-
 
         async function addApplication() {
             const company = document.getElementById('company').value.trim();
@@ -150,17 +196,11 @@
             const notes = document.getElementById('notes').value.trim();
 
             if(!company || !position) {
-                alert("Company and Position are required!");
+                alert("Company and Position fields are required!");
                 return;
             }
 
-            const payload = {
-                userId: parseInt(userId),
-                companyName: company,
-                position: position,
-                status: status,
-                notes: notes
-            };
+            const payload = { userId: parseInt(userId), companyName: company, position: position, status: status, notes: notes };
 
             try {
                 const response = await fetch('/api/applications', {
@@ -175,12 +215,47 @@
                     document.getElementById('notes').value = '';
                     loadApplications();
                 } else {
-                    alert("Failed to save data.");
+                    alert("Failed to save application to the database.");
                 }
             } catch (error) {
-                alert("Network error.");
+                alert("Network error: Server is unresponsive.");
             }
         }
+
+        let lastNotification = ""; 
+
+        async function fetchLiveJobUpdate() {
+            try {
+                const response = await fetch('/api/system/live-market');
+                const data = await response.json();
+                
+                const ticker = document.getElementById('live-ticker');
+                if (data.notification) {
+                    ticker.innerText = data.notification;
+                    lastNotification = data.notification;
+                }
+
+                const marketTbody = document.getElementById('marketTableBody');
+                if (data.jobsList && data.jobsList.length > 0) {
+                    marketTbody.innerHTML = ''; 
+                    
+                    data.jobsList.forEach(job => {
+                        const row = `<tr>
+                            <td style="font-weight: bold;">${job.company}</td>
+                            <td>${job.title}</td>
+                            <td style="color: #6c757d;">${job.posted}</td>
+                            <td><a href="${job.url}" target="_blank" class="link-btn">Apply</a></td>
+                        </tr>`;
+                        marketTbody.innerHTML += row;
+                    });
+                }
+            } catch (error) {
+                console.log("Failed to fetch live market data.");
+            }
+        }
+
+        fetchLiveJobUpdate();
+        setInterval(fetchLiveJobUpdate, 5000);
     </script>
 </body>
 </html>
