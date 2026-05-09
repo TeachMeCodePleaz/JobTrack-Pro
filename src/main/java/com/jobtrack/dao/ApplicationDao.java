@@ -39,7 +39,7 @@ public class ApplicationDao {
     }
 
     /**
-     * Updated to support a callback after writing is finished.
+     * Inserts a new application record asynchronously with a callback upon completion.
      */
     public static void addApplicationAsync(int userId, String company, String pos, String status, String notes, Runnable onComplete) {
         DatabaseExecutor.executeWrite(() -> {
@@ -54,7 +54,45 @@ public class ApplicationDao {
                 pstmt.executeUpdate();
                 if (onComplete != null) onComplete.run();
             } catch (SQLException e) {
-                System.err.println("[DB Error] " + e.getMessage());
+                System.err.println("[DB Error] Insert failed: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Updates an existing application record asynchronously based on the application ID.
+     */
+    public static void updateApplicationAsync(int id, String company, String pos, String status, String notes, Runnable onComplete) {
+        DatabaseExecutor.executeWrite(() -> {
+            String sql = "UPDATE applications SET company_name = ?, position = ?, status = ?, notes = ? WHERE id = ?";
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setString(1, company);
+                pstmt.setString(2, pos);
+                pstmt.setString(3, status);
+                pstmt.setString(4, notes);
+                pstmt.setInt(5, id);
+                pstmt.executeUpdate();
+                if (onComplete != null) onComplete.run();
+            } catch (SQLException e) {
+                System.err.println("[DB Error] Update failed: " + e.getMessage());
+            }
+        });
+    }
+
+    /**
+     * Deletes an application record asynchronously based on the application ID.
+     */
+    public static void deleteApplicationAsync(int id, Runnable onComplete) {
+        DatabaseExecutor.executeWrite(() -> {
+            String sql = "DELETE FROM applications WHERE id = ?";
+            try (Connection conn = DatabaseManager.getConnection();
+                 PreparedStatement pstmt = conn.prepareStatement(sql)) {
+                pstmt.setInt(1, id);
+                pstmt.executeUpdate();
+                if (onComplete != null) onComplete.run();
+            } catch (SQLException e) {
+                System.err.println("[DB Error] Delete failed: " + e.getMessage());
             }
         });
     }

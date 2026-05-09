@@ -6,24 +6,24 @@
     <title>JobTrack Pro - Dashboard</title>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 0; }
-        
         .navbar { background-color: #2c3e50; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
         .navbar h2 { margin: 0; }
+        .nav-links a { color: white; text-decoration: none; font-weight: bold; margin-right: 20px; font-size: 15px; opacity: 0.8; }
+        .nav-links a:hover, .nav-links a.active { opacity: 1; border-bottom: 2px solid white; padding-bottom: 3px; }
         .welcome-text { margin-right: 40px; font-weight: bold; font-size: 18px; }
         .logout-btn { background-color: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: bold; font-size: 14px; }
         .logout-btn:hover { background-color: #c82333; }
-
         #live-ticker { background-color: #e3f2fd; color: #0d47a1; padding: 10px 30px; font-weight: bold; font-size: 14px; text-align: center; border-bottom: 1px solid #bbdefb; }
-
         .main-wrapper { max-width: 1400px; width: 95%; margin: 0 auto; padding-top: 30px; }
         .container { display: grid; grid-template-columns: 350px 1fr; gap: 30px; margin-bottom: 30px; }
-        
         .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
         .card h3 { margin-top: 0; color: #2c3e50; border-bottom: 2px solid #f4f6f9; padding-bottom: 12px; font-size: 22px; margin-bottom: 25px; }
-
         input, select { width: 100%; height: 50px; padding: 12px 16px; margin-bottom: 25px; border: 1px solid #ced4da; border-radius: 6px; box-sizing: border-box; font-size: 16px; }
-        .submit-btn { width: 100%; height: 50px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 5px; }
+        
+        .submit-btn { width: 100%; height: 50px; background-color: #007bff; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; margin-top: 5px; transition: background 0.3s; }
         .submit-btn:hover { background-color: #0056b3; }
+        .submit-btn.update-mode { background-color: #28a745; }
+        .submit-btn.update-mode:hover { background-color: #218838; }
 
         table { width: 100%; border-collapse: collapse; }
         th, td { text-align: left; padding: 16px 12px; border-bottom: 1px solid #e9ecef; font-size: 15px; }
@@ -31,24 +31,28 @@
         td:nth-child(3), th:nth-child(3) { min-width: 130px; }
         
         .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; min-width: 90px; }
-        
         .status-Applied { background-color: #ede7f6; color: #5e35b1; }
         .status-OA { background-color: #cce5ff; color: #004085; }
         .status-Interview { background-color: #fff3cd; color: #856404; }
         .status-Offer { background-color: #d4edda; color: #155724; }
         .status-Rejected { background-color: #f8d7da; color: #721c24; }
 
+        /* Actions Buttons */
+        .action-btn { border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 12px; font-weight: bold; color: white; margin-right: 5px; }
+        .btn-edit { background-color: #ffc107; color: #212529; }
+        .btn-edit:hover { background-color: #e0a800; }
+        .btn-delete { background-color: #dc3545; }
+        .btn-delete:hover { background-color: #c82333; }
+
         .market-card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); margin-bottom: 50px; }
         .link-btn { background-color: #17a2b8; color: white; text-decoration: none; padding: 8px 14px; border-radius: 4px; font-size: 13px; font-weight: bold; }
         .link-btn:hover { background-color: #138496; }
 
-        /* Custom Pure CSS Bar Chart Styles */
         .analytics-container { display: flex; gap: 30px; margin-bottom: 25px; background: #fafbfc; padding: 20px; border-radius: 8px; border: 1px solid #e1e4e8; }
         .stat-box { flex: 1; }
         .total-box { flex: 0 0 160px; display: flex; flex-direction: column; justify-content: center; align-items: center; border-right: 1px solid #e1e4e8; }
         .total-number { font-size: 42px; font-weight: 800; color: #5e35b1; line-height: 1; margin-bottom: 5px; }
         .total-label { font-size: 12px; color: #6a737d; text-transform: uppercase; font-weight: bold; letter-spacing: 0.5px; }
-        
         .bar-chart-title { font-size: 13px; font-weight: bold; color: #24292e; margin-bottom: 12px; }
         .bar-chart-row { display: flex; align-items: center; margin-bottom: 8px; font-size: 13px; }
         .bar-label { width: 120px; font-weight: 600; color: #444d56; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -60,10 +64,12 @@
 <body>
 
     <div class="navbar">
-        <h2>JobTrack Pro Workspace</h2>
-        <div class="nav-links" style="margin-left: 40px;">
-            <a href="/dashboard.html" style="color: white; text-decoration: none; font-weight: bold; margin-right: 20px; font-size: 15px; border-bottom: 2px solid white; padding-bottom: 3px;">Dashboard</a>
-            <a href="/workshop.html" style="color: white; text-decoration: none; font-weight: bold; font-size: 15px; opacity: 0.8;">AI Workshop</a>
+        <div style="display: flex; align-items: center;">
+            <h2>JobTrack Pro Workspace</h2>
+            <div class="nav-links" style="margin-left: 40px;">
+                <a href="/dashboard.html" class="active">Dashboard</a>
+                <a href="/workshop.html">AI Workshop</a>
+            </div>
         </div>
         <div style="display: flex; align-items: center;">
             <span id="welcomeText" class="welcome-text"></span>
@@ -76,7 +82,7 @@
     <div class="main-wrapper">
         <div class="container">
             <div class="card">
-                <h3>Add New Application</h3>
+                <h3 id="formTitle">Add New Application</h3>
                 <input type="text" id="company" placeholder="Company Name (e.g., Amazon)" required>
                 <input type="text" id="position" placeholder="Position (e.g., SDE Intern)" required>
                 <select id="status">
@@ -87,14 +93,18 @@
                     <option value="Rejected">Rejected</option>
                 </select>
                 <input type="text" id="notes" placeholder="Notes (e.g., Referral)">
-                <button class="submit-btn" onclick="addApplication()">Save Application</button>
+                
+                <input type="hidden" id="editAppId" value="">
+                
+                <button class="submit-btn" id="submitBtn" onclick="saveApplication()">Save Application</button>
+                <button class="submit-btn" id="cancelBtn" onclick="resetForm()" style="display:none; background-color: #6c757d; margin-top: 10px;">Cancel Edit</button>
             </div>
 
             <div class="card">
                 <h3>My Applications</h3>
                 <table>
                     <thead>
-                        <tr><th>Company</th><th>Position</th><th>Status</th><th>Notes</th></tr>
+                        <tr><th>Company</th><th>Position</th><th>Status</th><th>Notes</th><th>Actions</th></tr>
                     </thead>
                     <tbody id="appTableBody"></tbody>
                 </table>
@@ -103,7 +113,6 @@
 
         <div class="market-card">
             <h3>🌍 Live Market: SDE 2026 Summer Intern</h3>
-            
             <div class="analytics-container" id="analytics-container" style="display: none;">
                 <div class="total-box">
                     <div class="total-number" id="total-jobs-count">0</div>
@@ -111,11 +120,9 @@
                 </div>
                 <div class="stat-box">
                     <div class="bar-chart-title">🏆 Top Hiring Companies</div>
-                    <div id="chart-container">
-                        </div>
+                    <div id="chart-container"></div>
                 </div>
             </div>
-
             <table>
                 <thead>
                     <tr><th>Company</th><th>Position Title</th><th>Posted</th><th>Action</th></tr>
@@ -131,18 +138,12 @@
         const userId = localStorage.getItem('userId');
         const username = localStorage.getItem('username');
 
-        if (!userId) { 
-            window.location.href = '/'; 
-        } else { 
-            document.getElementById('welcomeText').innerText = `Hello, ${username}`; 
-            loadApplications(); 
-        }
+        if (!userId) { window.location.href = '/'; } 
+        else { document.getElementById('welcomeText').innerText = `Hello, ${username}`; loadApplications(); }
 
-        function logout() { 
-            localStorage.clear(); 
-            window.location.href = '/'; 
-        }
+        function logout() { localStorage.clear(); window.location.href = '/'; }
 
+        // Load Applications
         async function loadApplications() {
             try {
                 const response = await fetch(`/api/applications?userId=${userId}`);
@@ -157,51 +158,104 @@
                     if (app.status.includes('Offer')) statusClass = 'status-Offer';
                     if (app.status.includes('Rejected')) statusClass = 'status-Rejected';
 
+                    // Ensure app objects return an 'id' from your Java backend
                     tbody.innerHTML += `<tr>
                         <td style="font-weight: bold; color: #2c3e50;">${app.companyName}</td>
                         <td>${app.position}</td>
                         <td><span class="status-badge ${statusClass}">${app.status}</span></td>
                         <td style="color: #6c757d;">${app.notes || '-'}</td>
+                        <td>
+                            <button class="action-btn btn-edit" onclick="startEdit(${app.id}, '${app.companyName}', '${app.position}', '${app.status}', '${app.notes || ''}')">Edit</button>
+                            <button class="action-btn btn-delete" onclick="deleteApplication(${app.id})">Del</button>
+                        </td>
                     </tr>`;
                 });
-            } catch (error) {}
+            } catch (error) { console.error("Failed to load personal application data", error); }
         }
 
-        async function addApplication() {
+        // Add or Update Application
+        async function saveApplication() {
             const company = document.getElementById('company').value.trim();
             const position = document.getElementById('position').value.trim();
             const status = document.getElementById('status').value;
             const notes = document.getElementById('notes').value.trim();
+            const editAppId = document.getElementById('editAppId').value;
 
             if(!company || !position) return;
             
             const payload = { userId: parseInt(userId), companyName: company, position: position, status: status, notes: notes };
+            
+            let url = '/api/applications';
+            let method = 'POST';
+
+            // If an ID exists, we are UPDATING an existing application (PUT)
+            if (editAppId) {
+                url = `/api/applications/${editAppId}`;
+                method = 'PUT';
+            }
 
             try {
-                const response = await fetch('/api/applications', { 
-                    method: 'POST', 
+                const response = await fetch(url, { 
+                    method: method, 
                     headers: { 'Content-Type': 'application/json' }, 
                     body: JSON.stringify(payload) 
                 });
                 
                 if(response.ok) {
-                    document.getElementById('company').value = ''; 
-                    document.getElementById('position').value = ''; 
-                    document.getElementById('notes').value = '';
+                    resetForm();
                     loadApplications();
                 }
             } catch (error) {}
         }
 
+        // Trigger Edit Mode
+        function startEdit(id, company, position, status, notes) {
+            document.getElementById('editAppId').value = id;
+            document.getElementById('company').value = company;
+            document.getElementById('position').value = position;
+            document.getElementById('status').value = status;
+            document.getElementById('notes').value = notes;
+            
+            document.getElementById('formTitle').innerText = "Update Application";
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Update Application";
+            btn.classList.add("update-mode");
+            document.getElementById('cancelBtn').style.display = 'block';
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Reset Form from Edit to Add Mode
+        function resetForm() {
+            document.getElementById('editAppId').value = '';
+            document.getElementById('company').value = ''; 
+            document.getElementById('position').value = ''; 
+            document.getElementById('notes').value = '';
+            document.getElementById('status').value = 'Applied';
+            
+            document.getElementById('formTitle').innerText = "Add New Application";
+            const btn = document.getElementById('submitBtn');
+            btn.innerText = "Save Application";
+            btn.classList.remove("update-mode");
+            document.getElementById('cancelBtn').style.display = 'none';
+        }
+
+        // Delete Application
+        async function deleteApplication(id) {
+            if (confirm("Are you sure you want to delete this application?")) {
+                try {
+                    const response = await fetch(`/api/applications/${id}`, { method: 'DELETE' });
+                    if(response.ok) { loadApplications(); }
+                } catch (error) {}
+            }
+        }
+
+        // Market Tracker Logic
         async function fetchLiveJobUpdate() {
             try {
-                // 1. Fetch and render market list
                 const response = await fetch('/api/system/live-market');
                 const data = await response.json();
-                
-                if (data.notification) {
-                    document.getElementById('live-ticker').innerText = data.notification;
-                }
+                if (data.notification) document.getElementById('live-ticker').innerText = data.notification;
 
                 const marketTbody = document.getElementById('marketTableBody');
                 if (data.jobsList && data.jobsList.length > 0) {
@@ -216,30 +270,23 @@
                     });
                 }
                 
-                // 2. Fetch and render Analytics Bar Chart
                 const analyticsResponse = await fetch('/api/system/analytics');
                 const analyticsData = await analyticsResponse.json();
-                
                 if (analyticsData.totalJobs > 0) {
                     document.getElementById('analytics-container').style.display = 'flex';
                     document.getElementById('total-jobs-count').innerText = analyticsData.totalJobs;
-                    
                     const chartContainer = document.getElementById('chart-container');
                     chartContainer.innerHTML = ''; 
-                    
                     analyticsData.topCompanies.forEach(stat => {
                         chartContainer.innerHTML += `
                             <div class="bar-chart-row">
                                 <div class="bar-label" title="${stat.company}">${stat.company}</div>
-                                <div class="bar-track">
-                                    <div class="bar-fill" style="width: ${stat.percentage}%;"></div>
-                                </div>
+                                <div class="bar-track"><div class="bar-fill" style="width: ${stat.percentage}%;"></div></div>
                                 <div class="bar-value">${stat.count}</div>
                             </div>
                         `;
                     });
                 }
-
             } catch (error) {}
         }
 
