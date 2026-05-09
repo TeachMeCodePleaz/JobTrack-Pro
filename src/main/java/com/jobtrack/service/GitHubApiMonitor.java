@@ -7,20 +7,26 @@ import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.concurrent.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Service
 public class GitHubApiMonitor {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private List<Map<String, String>> latestJobsList = new ArrayList<>();
-    private String lastNewestJobTitle = "";
-    private String latestNotification = "📡 System online. Monitoring SimplifyJobs Repo...";
+    
+    // Concurrency & Thread Safety
+    // use volatile to ensure visibility across threads, and CopyOnWriteArrayList for thread-safe updates
+    private volatile List<Map<String, String>> latestJobsList = new CopyOnWriteArrayList<>();
+    private volatile String lastNewestJobTitle = "";
+    private volatile String latestNotification = "📡 System initializing... Scanning GitHub repository.";
+
+    // Parallel Multithreading
+    // Using a fixed thread pool to manage concurrent requests to different branches
+    private final ExecutorService executorService = Executors.newFixedThreadPool(3);
 
     public List<Map<String, String>> getLatestJobsList() {
         return latestJobsList;
@@ -34,23 +40,39 @@ public class GitHubApiMonitor {
     @Scheduled(fixedRate = 30000)
     public void monitorJobsAPI() {
         String fetchTime = LocalDateTime.now().format(DateTimeFormatter.ofPattern("HH:mm:ss"));
-        System.out.println("\n[Background Thread] SCRAPING GITHUB AT " + fetchTime);
+        System.out.println("\n[Background Thread] PARALLEL SCRAPING GITHUB REPO AT " + fetchTime);
 
         String[] branches = {"dev", "main", "master"};
-        String rawData = null;
 
-        for (String branch : branches) {
-            try {
-                String url = "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/" + branch + "/README.md";
-                String responseText = restTemplate.getForObject(url, String.class);
-                if (responseText != null && (responseText.contains("<tr>") || responseText.contains("|"))) {
-                    rawData = responseText;
-                    break;
-                }
-            } catch (Exception e) {}
+        // Parallel Multithreading: simultaneously start 3 threads to fetch 3 branches, use whoever fetches first!
+        List<CompletableFuture<String>> futures = Arrays.stream(branches)
+                .map(branch -> CompletableFuture.supplyAsync(() -> {
+                    try {
+                        String url = "https://raw.githubusercontent.com/SimplifyJobs/Summer2026-Internships/" + branch + "/README.md";
+                        String responseText = restTemplate.getForObject(url, String.class);
+                        if (responseText != null && (responseText.contains("<tr>") || responseText.contains("|"))) {
+                            System.out.println("[Thread-" + Thread.currentThread().getId() + "] Successfully fetched from branch: " + branch);
+                            return responseText;
+                        }
+                    } catch (Exception e) {
+                        // one of the threads might fail due to branch not existing, just log and let others continue
+                    }
+                    return null;
+                }, executorService))
+                .collect(Collectors.toList());
+
+        // Wait for all threads to complete and get the first successful result
+        String rawData = futures.stream()
+                .map(CompletableFuture::join)
+                .filter(Objects::nonNull)
+                .findFirst()
+                .orElse(null);
+
+        if (rawData != null) {
+            parseRepositoryData(rawData, fetchTime);
+        } else {
+            System.err.println("[Background Thread] ERROR: Could not fetch data from any branch.");
         }
-
-        if (rawData != null) parseRepositoryData(rawData, fetchTime);
     }
 
     private void parseRepositoryData(String data, String fetchTime) {
@@ -75,21 +97,14 @@ public class GitHubApiMonitor {
                     
                     if (rawCompany.isEmpty() || rawCompany.toLowerCase().contains("company") || rawCompany.contains("↳")) continue;
 
-                    // --- NEW SECURITY URL FILTERING ---
                     String finalUrl = "https://github.com/SimplifyJobs/Summer2026-Internships";
                     Matcher urlMatcher = urlPattern.matcher(rowHtml);
-                    
                     while (urlMatcher.find()) {
                         String found = urlMatcher.group(1) != null ? urlMatcher.group(1) : urlMatcher.group(2);
                         if (found == null) continue;
-
-                        // BLACKLIST: Ignore Imgur (screenshots) and Simplify company profiles
-                        boolean isImgur = found.contains("imgur.com");
-                        boolean isSimplifyProfile = found.contains("simplify.jobs/c/");
-                        
-                        if (!isImgur && !isSimplifyProfile) {
+                        if (!found.contains("imgur.com") && !found.contains("simplify.jobs/c/")) {
                             finalUrl = found;
-                            break; // Take the FIRST valid application link and stop
+                            break; 
                         }
                     }
 
@@ -104,13 +119,15 @@ public class GitHubApiMonitor {
                     if (parsedJobs.stream().noneMatch(j -> j.get("company").equals(rawCompany) && j.get("title").equals(jobData.get("title")))) {
                         parsedJobs.add(jobData);
                     }
-                    if (parsedJobs.size() >= 20) break;
+                    if (parsedJobs.size() >= 50) break;
                 }
             }
         }
 
         if (!parsedJobs.isEmpty()) {
-            latestJobsList = parsedJobs;
+            // Concurrency & Thread Safety: update the shared latestJobsList atomically by replacing the entire list reference
+            latestJobsList = new CopyOnWriteArrayList<>(parsedJobs);
+            
             Map<String, String> newestJob = parsedJobs.get(0);
             String currentTopJob = newestJob.get("company") + " - " + newestJob.get("title");
             if (!currentTopJob.equals(this.lastNewestJobTitle)) {
