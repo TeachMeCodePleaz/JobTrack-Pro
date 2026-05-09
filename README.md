@@ -11,7 +11,7 @@ Please see the video about the project details.
 ## 📖 Project Overview
 JobTrack Pro is a comprehensive, full-stack desktop-class web application designed to streamline the software engineering job-hunting process. It moves beyond a simple CRUD application by integrating a real-time multi-threaded web scraper, advanced data analytics using Java Stream API, and an AI-powered Resume Workshop that leverages the Gemini 2.5 Flash Large Language Model.
 
-## 🛠️ 4 Advanced Java Concepts Implemented
+## 🛠️ 5 Advanced Java Concepts Implemented
 
 ### 1. Multithreading & Concurrency (Thread Safety)
 To provide real-time market data without freezing the user interface, I implemented parallel multithreading.
@@ -32,6 +32,12 @@ Instead of simply displaying the scraped data, the application performs real-tim
 ### 4. Advanced Regex & State-Machine Parsing
 Developed a highly resilient dual-engine parser (handling both Raw HTML and Markdown table formats). It utilizes `Pattern.DOTALL` for multi-line regex extraction and a custom state-machine algorithm to safely parse markdown pipes (`|`) while ignoring those nested inside hyperlink brackets, ensuring zero data corruption during the scrape.
 
+### 5. Custom DAO Pattern & Asynchronous SQLite Integration
+Bypassed high-level abstraction frameworks to implement a custom **Data Access Object (DAO)** architecture using pure JDBC.
+* **Asynchronous Database I/O:** Executed all database operations (e.g., `INSERT`, `UPDATE`, `DELETE`) on background threads using `CompletableFuture` and custom Runnable callbacks, ensuring the main Tomcat worker threads are never blocked during data persistence.
+* **Security & Resource Management:** Utilized `PreparedStatement` to prevent SQL injection and applied `try-with-resources` blocks for automatic connection closure and memory leak prevention.
+* **Zero-Configuration:** Leveraged SQLite alongside auto-initialization scripts (`CREATE TABLE IF NOT EXISTS`) crafted with Java 15+ Text Blocks (`"""`), ensuring the database environment sets itself up completely out-of-the-box.
+
 ---
 
 ## 🚀 How to Run the Project
@@ -45,11 +51,11 @@ This project is fully self-contained and designed to be runnable out of the box.
 
 ### Execution Steps
 1.  Unzip the project folder and open it in your preferred IDE.
-2.  Navigate to `src/main/java/com/jobtrack/JobTrackProApplication.java`.
+2.  Navigate to `src/main/java/com/jobtrack/JobTrackApplication.java`.
 3.  Run the `main` method to start the Spring Boot server.
 4.  Open your web browser and go to: `http://localhost:8080/dashboard.html`
 
-*(Note: If a database is required for the application tracker CRUD functionality, an H2 in-memory database is pre-configured and will automatically initialize upon startup.)*
+*(Note: The system utilizes an embedded SQLite database. Upon the first launch, the `@PostConstruct` lifecycle hook in the main application class will automatically trigger the `DatabaseManager` to create the `jobtrack_pro.db` file and initialize all necessary tables. No external database software setup is required from the grader.)*
 
 ---
 
@@ -68,4 +74,4 @@ To test the **AI Workshop** feature:
 4. Paste a sample Job Description and Resume in the respective text areas, and click "Extract JD Insights" or "Analyze & Optimize Resume" to see the networking and AI integration in action.
 
 --- 
-*Designed and built for CS6103 Final Project.*
+*Designed and built by Ruihan Zhang for CS6103 Final Project.*
