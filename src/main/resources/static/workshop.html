@@ -181,7 +181,11 @@
 
                     const sugUl = document.getElementById('suggestionsList');
                     sugUl.innerHTML = '';
-                    data.suggestions.forEach(sug => sugUl.innerHTML += `<li>${sug}</li>`);
+                    data.suggestions.forEach(sug => {
+                        // Convert Markdown **bold** syntax to HTML <strong> tags
+                        const formattedSug = sug.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        sugUl.innerHTML += `<li>${formattedSug}</li>`;
+                    });
 
                     document.getElementById('matchResults').style.display = 'block';
                 } else { alert(data.error); }
