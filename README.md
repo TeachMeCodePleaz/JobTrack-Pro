@@ -74,4 +74,15 @@ To test the **AI Workshop** feature:
 4. Paste a sample Job Description and Resume in the respective text areas, and click "Extract JD Insights" or "Analyze & Optimize Resume" to see the networking and AI integration in action.
 
 --- 
+
+## ⚠️ Notice
+
+This Github repository doesn't have the `APIkey.txt` and `video demo`(contains 2 version: .mov and .mp4), for grading, please unzip the file and open the folder in IDE and then you can see these file. The 2 video demo files are same but have different file format, please select just one of them to watch.
+
+If you are a Github user and are interested in this project, please get your own Gemini-2.5-flash API to use.
+
+If you meet difficulties, find problems, or have a good idea to improve the project, please contact me with the email or via Github!
+
+---
+
 *Designed and built by Ruihan Zhang for CS6103 Final Project.*
