@@ -1,14 +1,17 @@
 # JobTrack Pro 🚀
 
 **Course:** CS6103 Introduction to Java - Spring 2026
+
 **Name:** Ruihan Zhang
+
 **NetID:** rz3373
+
 Please see the video about the project details.
 
 ## 📖 Project Overview
 JobTrack Pro is a comprehensive, full-stack desktop-class web application designed to streamline the software engineering job-hunting process. It moves beyond a simple CRUD application by integrating a real-time multi-threaded web scraper, advanced data analytics using Java Stream API, and an AI-powered Resume Workshop that leverages the Gemini 2.5 Flash Large Language Model.
 
-## 🛠️ 3+ Advanced Java Concepts Implemented
+## 🛠️ 4 Advanced Java Concepts Implemented
 
 ### 1. Multithreading & Concurrency (Thread Safety)
 To provide real-time market data without freezing the user interface, I implemented parallel multithreading.
@@ -59,7 +62,7 @@ To test the **AI Workshop** feature:
 2. The UI is designed to **ask for the user input an API key** before any processing occurs.
 3. Please copy and paste the following provided Gemini API Key into the secure input field on the screen:
    
-   **Grader API Key:** `Please see the APIkey.txt and copy it, test it in the project`
+   **Grader API Key:** Please get the API from the `APIkey.txt`, then copy and test it in the project.
 
    *(This key is specifically authorized for the `gemini-2.5-flash` model required by the workshop).*
 4. Paste a sample Job Description and Resume in the respective text areas, and click "Extract JD Insights" or "Analyze & Optimize Resume" to see the networking and AI integration in action.
