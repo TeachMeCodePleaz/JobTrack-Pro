@@ -1,13 +1,5 @@
 # JobTrack Pro 🚀
 
-**Course:** CS6103 Introduction to Java - Spring 2026
-
-**Name:** Ruihan Zhang
-
-**NetID:** rz3373
-
-Please see the video about the project details.
-
 ## 📖 Project Overview
 JobTrack Pro is a comprehensive, full-stack desktop-class web application designed to streamline the software engineering job-hunting process. It moves beyond a simple CRUD application by integrating a real-time multi-threaded web scraper, advanced data analytics using Java Stream API, and an AI-powered Resume Workshop that leverages the Gemini 2.5 Flash Large Language Model.
 
@@ -59,7 +51,7 @@ This project is fully self-contained and designed to be runnable out of the box.
 
 ---
 
-## 🔑 API Key Handling (Important for Grading)
+## 🔑 API Key Handling 
 
 As per the final project requirements, **no API keys are hardcoded in the source code**. 
 
@@ -85,4 +77,4 @@ If you meet difficulties, find problems, or have a good idea to improve the proj
 
 ---
 
-*Designed and built by Ruihan Zhang for CS6103 Final Project.*
+*Designed and built by Ruihan Zhang*
