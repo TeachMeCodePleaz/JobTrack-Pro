@@ -59,17 +59,11 @@ To test the **AI Workshop** feature:
 1. Navigate to the "AI Workshop" tab in the application (`http://localhost:8080/workshop.html`).
 2. The UI is designed to **ask for the user input an API key** before any processing occurs.
 3. Please copy and paste the following provided Gemini API Key into the secure input field on the screen:
-   
-   **Grader API Key:** Please get the API from the `APIkey.txt`, then copy and test it in the project.
-
-   *(This key is specifically authorized for the `gemini-2.5-flash` model required by the workshop).*
 4. Paste a sample Job Description and Resume in the respective text areas, and click "Extract JD Insights" or "Analyze & Optimize Resume" to see the networking and AI integration in action.
 
 --- 
 
 ## ⚠️ Notice
-
-This Github repository doesn't have the `APIkey.txt` and `video demo`(contains 2 version: .mov and .mp4), for grading, please unzip the file and open the folder in IDE and then you can see these file. The 2 video demo files are same but have different file format, please select just one of them to watch.
 
 If you are a Github user and are interested in this project, please get your own Gemini-2.5-flash API to use.
 
